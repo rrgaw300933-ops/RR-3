@@ -1,0 +1,2509 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Restaurant Rechner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .menu-items {
+            padding: 20px;
+        }
+        
+        .menu-item {
+            background: #f8f9fa;
+            margin-bottom: 15px;
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .item-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .item-number {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            font-size: 0.9rem;
+        }
+        
+        .item-info {
+            flex: 1;
+        }
+        
+        .item-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .item-price {
+            color: #667eea;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+        
+        .quantity-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        /* Number Input als Alternative zu Buttons */
+        .quantity-input {
+            background: white;
+            border: 3px solid #667eea;
+            color: #667eea;
+            padding: 12px;
+            border-radius: 15px;
+            font-weight: bold;
+            width: 80px;
+            text-align: center;
+            font-size: 1.2rem;
+            -webkit-appearance: none;
+            -moz-appearance: textfield;
+        }
+        
+        .quantity-input:focus {
+            outline: none;
+            border-color: #ff6b6b;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.3);
+        }
+        
+        /* Verstecke Spinner bei Number Input */
+        .quantity-input::-webkit-outer-spin-button,
+        .quantity-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        .quantity-btn {
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            border: none;
+            color: white;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            font-size: 1.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            touch-action: manipulation;
+            user-select: none;
+            outline: none;
+        }
+        
+        .quantity-btn:active {
+            transform: scale(0.9);
+            background: linear-gradient(135deg, #ff5252, #ffc107);
+        }
+        
+        .item-subtotal {
+            font-weight: bold;
+            color: #333;
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            min-width: 80px;
+            text-align: right;
+        }
+        
+        .total-section {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .total-amount {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 10px 0 20px 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .payment-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+        
+        .payment-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .payment-row label {
+            font-weight: bold;
+            font-size: 1.1rem;
+            min-width: 80px;
+        }
+        
+        .payment-input {
+            background: white;
+            border: none;
+            padding: 12px 15px;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            width: 120px;
+            outline: none;
+        }
+        
+        .payment-input:focus {
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+            transform: scale(1.05);
+        }
+        
+        .payment-row span {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .change-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .change-label {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .change-amount {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4CAF50;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            background: white;
+            color: #333;
+            padding: 8px 15px;
+            border-radius: 8px;
+            min-width: 80px;
+        }
+        
+        .change-negative {
+            color: #f44336 !important;
+            background: #ffebee !important;
+        }
+        
+        .reset-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 15px 35px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+            touch-action: manipulation;
+        }
+        
+        .reset-btn:active {
+            transform: scale(0.95);
+            background: rgba(255,255,255,0.4);
+        }
+        
+        .js-status {
+            background: #ffeb3b;
+            color: #333;
+            text-align: center;
+            padding: 10px;
+            font-size: 0.9rem;
+            display: block;
+        }
+        
+        .js-enabled .js-status {
+            display: none;
+        }
+        
+            @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .menu-items {
+                padding: 15px;
+            }
+            
+            .menu-item {
+                padding: 15px;
+            }
+            
+            .quantity-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 2rem;
+            }
+            
+            .quantity-section {
+                gap: 12px;
+            }
+            
+            .payment-row {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            
+            .payment-row label {
+                min-width: auto;
+                width: 100%;
+                margin-bottom: 5px;
+            }
+            
+            .payment-input {
+                width: 100px;
+            }
+            
+            .change-row {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+        }
+ 
+        /* ===== BESTELLVERWALTUNG ===== */
+        .order-panel {
+            background: #fff8e1;
+            border-top: 4px solid #feca57;
+            padding: 20px;
+        }
+        .order-panel h3 {
+            color: #e67e22;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        .table-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .table-input {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px 15px;
+            border: 2px solid #feca57;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            outline: none;
+            background: white;
+        }
+        .table-input:focus { border-color: #e67e22; }
+        .btn-order {
+            background: linear-gradient(135deg, #f7971e, #ffd200);
+            border: none;
+            color: white;
+            padding: 13px 22px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            touch-action: manipulation;
+            white-space: nowrap;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        .btn-order:active { transform: scale(0.96); }
+        .btn-clear-orders {
+            background: linear-gradient(135deg, #c0392b, #e74c3c);
+            border: none;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+ 
+        /* Bestellliste */
+        .orders-list {
+            margin-top: 15px;
+        }
+        .order-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-left: 5px solid #feca57;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .order-card.status-ausgeliefert { border-left-color: #3498db; }
+        .order-card.status-bezahlt { border-left-color: #2ecc71; background: #f0fff4; }
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .order-meta {
+            font-weight: bold;
+            color: #333;
+            font-size: 1rem;
+        }
+        .order-meta span {
+            font-size: 0.85rem;
+            color: #888;
+            font-weight: normal;
+        }
+        .order-status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        .badge-aufgenommen { background: #fff3cd; color: #856404; }
+        .badge-ausgeliefert { background: #cce5ff; color: #004085; }
+        .badge-bezahlt { background: #d4edda; color: #155724; }
+ 
+        .order-items-list {
+            font-size: 0.9rem;
+            color: #555;
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        .order-total-line {
+            font-weight: bold;
+            color: #333;
+            font-size: 1rem;
+            border-top: 1px solid #eee;
+            padding-top: 8px;
+        }
+        .order-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .btn-status {
+            padding: 7px 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        .btn-liefern { background: #3498db; color: white; }
+        .btn-bezahlen { background: #2ecc71; color: white; }
+        .btn-loeschen { background: #e74c3c; color: white; }
+        .btn-status:active { opacity: 0.8; transform: scale(0.97); }
+        .orders-empty {
+            text-align: center;
+            color: #aaa;
+            font-style: italic;
+            padding: 20px;
+        }
+        .orders-summary {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        .summary-chip {
+            background: white;
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            border: 2px solid #feca57;
+            color: #555;
+        }
+    
+html {
+    scroll-behavior: smooth;
+}
+ 
+/* ===== MOBILE NAVIGATION ===== */
+.mobile-nav {
+    position: sticky;
+    top: 0;
+    z-index: 999;
+    background: rgba(255,255,255,0.96);
+    backdrop-filter: blur(10px);
+    padding: 10px;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    border-bottom: 2px solid #eee;
+}
+ 
+.mobile-nav a {
+    text-decoration: none;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 8px 14px;
+    border-radius: 20px;
+    white-space: nowrap;
+    font-size: 0.9rem;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+ 
+.mobile-nav a:hover {
+    opacity: 0.9;
+}
+ 
+/* Smaller mobile layout */
+@media (max-width: 480px) {
+ 
+    body {
+        padding: 6px;
+    }
+ 
+    .container {
+        max-width: 100%;
+        border-radius: 12px;
+    }
+ 
+    .header {
+        padding: 18px 10px;
+    }
+ 
+    .header h1 {
+        font-size: 1.35rem;
+    }
+ 
+    .menu-items {
+        padding: 10px;
+    }
+ 
+    .menu-item {
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 10px;
+    }
+ 
+    .item-name {
+        font-size: 0.9rem;
+        line-height: 1.3;
+    }
+ 
+    .item-price {
+        font-size: 0.9rem;
+    }
+ 
+    .item-number {
+        width: 28px;
+        height: 28px;
+        font-size: 0.8rem;
+        margin-right: 10px;
+    }
+ 
+    .quantity-btn {
+        width: 42px;
+        height: 42px;
+        font-size: 1.3rem;
+    }
+ 
+    .quantity-input {
+        width: 55px;
+        padding: 8px;
+        font-size: 1rem;
+        border-radius: 10px;
+    }
+ 
+    .quantity-section {
+        gap: 8px;
+    }
+ 
+    .item-subtotal {
+        font-size: 0.95rem;
+        min-width: 60px;
+    }
+ 
+    h2 {
+        font-size: 1.1rem;
+        margin-top: 8px;
+    }
+ 
+    .payment-input {
+        width: 90px;
+        font-size: 1rem;
+    }
+ 
+    .btn-order {
+        width: 100%;
+        text-align: center;
+    }
+}
+ 
+ 
+/* ===== ORDER SUMMARY MODAL ===== */
+.orders-modal {
+    display: none;
+    position: fixed;
+    z-index: 5000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    overflow-y: auto;
+    padding: 20px;
+}
+ 
+.orders-modal-content {
+    background: white;
+    max-width: 700px;
+    margin: 20px auto;
+    border-radius: 16px;
+    padding: 20px;
+}
+ 
+.summary-order {
+    border-bottom: 1px solid #ddd;
+    padding: 12px 0;
+}
+ 
+.summary-total {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 12px;
+    background: #f5f5f5;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+ 
+.close-summary-btn {
+    background: #667eea;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-top: 20px;
+}
+ 
+/* ===== AKTUELLER BESTELLZETTEL ===== */
+.current-order-summary {
+    background: #fffbf0;
+    border: 2px solid #feca57;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+}
+.current-order-summary h4 {
+    color: #e67e22;
+    font-size: 1rem;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.current-order-summary .cos-empty {
+    color: #aaa;
+    font-size: 0.9rem;
+    font-style: italic;
+}
+.current-order-summary .cos-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.88rem;
+    color: #444;
+    padding: 3px 0;
+    border-bottom: 1px dotted #f0d080;
+}
+.current-order-summary .cos-item:last-of-type {
+    border-bottom: none;
+}
+.current-order-summary .cos-total {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    font-size: 0.95rem;
+    color: #333;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 2px solid #feca57;
+}
+ 
+</style>
+</head>
+<body>
+ 
+<div class="mobile-nav">
+    <a href="#Getränke">🍹 Getränke</a>
+    <a href="#Weine">🍷 Weine</a>
+    <a href="#Speisen">🍽️ Speisen</a>
+    <a href="#Summe">💰 Summe</a>
+</div>
+ 
+    <div class="js-status">
+        ⚠️ Für die automatische Berechnung speichern Sie diese Datei auf Ihrem Gerät und öffnen Sie sie direkt im Browser (nicht aus E-Mail).
+    </div>
+    
+ 
+  <div class="container">
+        <div class="header">
+            <h1>🍽️ Restaurant Rechner</h1>
+            <p>Wählen Sie Ihre Speisen</p>
+        </div>
+ 
+     <h2 id="Getränke" style="color: green;">Getränke</h2>&nbsp <a href="#Weine">Link Weine</a> &nbsp <a href="#Speisen">Link Speisen</a>  &nbsp <a href="#Summe">Link Summe</a>
+ 
+ 
+ 
+
+        <div class="menu-items">
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">1</div>
+                    <div class="item-info">
+                        <div class="item-name">Coca-Cola, Limonade 0,2 l</div>
+                        <div class="item-price">2,50 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(0, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-0" value="0" min="0" max="99" onchange="updateFromInput(0)" oninput="updateFromInput(0)">
+                        <button class="quantity-btn" onclick="changeQuantity(0, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-0">0,00 €</div>
+                </div>
+            </div>
+            
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">2</div>
+                    <div class="item-info">
+                        <div class="item-name">Coca Cola, Limonade 0,4 l</div>
+                        <div class="item-price">4,50 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(1, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-1" value="0" min="0" max="99" onchange="updateFromInput(1)" oninput="updateFromInput(1)">
+                        <button class="quantity-btn" onclick="changeQuantity(1, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-1">0,00 €</div>
+                </div>
+            </div>
+            
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">3</div>
+                    <div class="item-info">
+                        <div class="item-name">Mineralwasser 0,2 l</div>
+                        <div class="item-price">2,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(2, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-2" value="0" min="0" max="99" onchange="updateFromInput(2)" oninput="updateFromInput(2)">
+                        <button class="quantity-btn" onclick="changeQuantity(2, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-2">0,00 €</div>
+                </div>
+            </div>
+            
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">4</div>
+                    <div class="item-info">
+                        <div class="item-name">Mineralwasser Flasche 0,75</div>
+                        <div class="item-price">4,50 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(3, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-3" value="0" min="0" max="99" onchange="updateFromInput(3)" oninput="updateFromInput(3)">
+                        <button class="quantity-btn" onclick="changeQuantity(3, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-3">0,00 €</div>
+                </div>
+            </div>
+            
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">5</div>
+                    <div class="item-info">
+                        <div class="item-name">Trauben- Apfelsaft / Schorlen / Weinschorlen (Riesl, Rosé) 0,2 l</div>
+                        <div class="item-price">2,50 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(4, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-4" value="0" min="0" max="99" onchange="updateFromInput(4)" oninput="updateFromInput(4)">
+                        <button class="quantity-btn" onclick="changeQuantity(4, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-4">0,00 €</div>
+                </div>
+            </div>
+  
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">6</div>
+                    <div class="item-info">
+                        <div class="item-name">Trauben- Apfelsaft / Schorlen / Weinschorlen (Riesl, Rosé) 0,4 l</div>
+                        <div class="item-price">4,50 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(5, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-5" value="0" min="0" max="99" onchange="updateFromInput(5)" oninput="updateFromInput(5)">
+                        <button class="quantity-btn" onclick="changeQuantity(5, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-5">0,00 €</div>
+                </div>
+            </div>
+ 
+                <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">7</div>
+                    <div class="item-info">
+                        <div class="item-name">Traubensecco 0,1 l</div>
+                        <div class="item-price">3,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(6, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-6" value="0" min="0" max="99" onchange="updateFromInput(6)" oninput="updateFromInput(6)">
+                        <button class="quantity-btn" onclick="changeQuantity(6, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-6">0,00 €</div>
+                </div>
+            </div>
+ 
+          
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">8</div>
+                    <div class="item-info">
+                        <div class="item-name">Traubensecco Flasche 0,75 l</div>
+                        <div class="item-price">15,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(7,-1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-7" value="0" min="0" max="99" onchange="updateFromInput(7)" oninput="updateFromInput(7)">
+                        <button class="quantity-btn" onclick="changeQuantity(7, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-7">0,00 €</div>
+                </div>
+            </div>
+ 
+ 
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">9</div>
+                    <div class="item-info">
+                        <div class="item-name">Hefebranntwein  2cl</div>
+                        <div class="item-price">2,50 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(8, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-8" value="0" min="0" max="99" onchange="updateFromInput(8)" oninput="updateFromInput(8)">
+                        <button class="quantity-btn" onclick="changeQuantity(8, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-8">0,00 €</div>
+                </div>
+            </div>
+ 
+<div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number" style="background:linear-gradient(135deg,#feca57,#f7971e);color:#333;">📝</div>
+                    <div class="item-info">
+                        <div class="item-name">Bemerkungen Getränke</div>
+                        <div class="item-price" style="color:#999;">Freitext</div>
+                    </div>
+                </div>
+                <div class="quantity-controls" style="display:block;">
+                    <textarea id="bemerkungen-getraenke-input" placeholder="Bemerkungen zu Getränken …" rows="3"
+                        style="width:100%;padding:10px 12px;border:3px solid #feca57;border-radius:12px;font-size:0.95rem;font-family:inherit;resize:vertical;outline:none;box-sizing:border-box;margin-top:5px;"
+                        oninput="updateBemerkungen()"></textarea>
+                </div>
+            </div>
+
+  <h2  id="Weine" style="color: green;">Weine</h2>&nbsp <a href="#Getränke">Link Getränke</a> &nbsp <a href="#Speisen">Link Speisen</a>  &nbsp <a href="#Summe">Link Summe</a>
+ 
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">10</div>
+                    <div class="item-info">
+                        <div class="item-name">01. Weißer Burgunder trocken 2023, 0,1 Glas</div>
+                        <div class="item-price">3,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(9, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-9" value="0" min="0" max="99" onchange="updateFromInput(9)" oninput="updateFromInput(9)">
+                        <button class="quantity-btn" onclick="changeQuantity(9, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-9">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">11</div>
+                    <div class="item-info">
+                        <div class="item-name">01.a Weißer Burgunder trocken 2023, Flasche 0,75 l</div>
+                        <div class="item-price">16,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(10, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-10" value="0" min="0" max="99" onchange="updateFromInput(10)" oninput="updateFromInput(10)">
+                        <button class="quantity-btn" onclick="changeQuantity(10, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-10">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">12</div>
+                    <div class="item-info">
+                        <div class="item-name">02. Rivaner Class feinherb, 0,1 Glas</div>
+                        <div class="item-price">3,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(11, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-11" value="0" min="0" max="99" onchange="updateFromInput(11)" oninput="updateFromInput(11)">
+                        <button class="quantity-btn" onclick="changeQuantity(11, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-11">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">13</div>
+                    <div class="item-info">
+                        <div class="item-name">02a. Rivaner Class feinherb, Flasche 0,75l</div>
+                        <div class="item-price">16,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(12, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-12" value="0" min="0" max="99" onchange="updateFromInput(12)" oninput="updateFromInput(12)">
+                        <button class="quantity-btn" onclick="changeQuantity(12, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-12">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">14</div>
+                    <div class="item-info">
+                        <div class="item-name">03. Guts Riesling feinherb 0,1 Glas</div>
+                        <div class="item-price">3,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(13, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-13" value="0" min="0" max="99" onchange="updateFromInput(13)" oninput="updateFromInput(13)">
+                        <button class="quantity-btn" onclick="changeQuantity(13, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-13">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">15</div>
+                    <div class="item-info">
+                        <div class="item-name">03a. Guts Riesling feinherb 0,75 Flasche</div>
+                        <div class="item-price">16,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(14, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-14" value="0" min="0" max="99" onchange="updateFromInput(14)" oninput="updateFromInput(14)">
+                        <button class="quantity-btn" onclick="changeQuantity(14, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-14">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">16</div>
+                    <div class="item-info">
+                        <div class="item-name">04. Grauer Burgunder trocken 0,1 Glas</div>
+                        <div class="item-price">3,50 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(15, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-15" value="0" min="0" max="99" onchange="updateFromInput(15)" oninput="updateFromInput(15)">
+                        <button class="quantity-btn" onclick="changeQuantity(15, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-15">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">17</div>
+                    <div class="item-info">
+                        <div class="item-name">04a. Grauer Burgunder trocken 0,75 Flasche</div>
+                        <div class="item-price">18,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(16, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-16" value="0" min="0" max="99" onchange="updateFromInput(16)" oninput="updateFromInput(16)">
+                        <button class="quantity-btn" onclick="changeQuantity(16, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-16">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">18</div>
+                    <div class="item-info">
+                        <div class="item-name">05. Riesling v rot Sandstein 0,1 Glas</div>
+                        <div class="item-price">3,50 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(17, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-17" value="0" min="0" max="99" onchange="updateFromInput(17)" oninput="updateFromInput(17)">
+                        <button class="quantity-btn" onclick="changeQuantity(17, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-17">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">19</div>
+                    <div class="item-info">
+                        <div class="item-name">05a. Riesling v rot Sandstein 0,75 Flasche</div>
+                        <div class="item-price">18,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(18, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-18" value="0" min="0" max="99" onchange="updateFromInput(18)" oninput="updateFromInput(18)">
+                        <button class="quantity-btn" onclick="changeQuantity(18, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-18">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">20</div>
+                    <div class="item-info">
+                        <div class="item-name">06. Sauvignon Blanc 0,1 Glas</div>
+                        <div class="item-price">3,50 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(19, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-19" value="0" min="0" max="99" onchange="updateFromInput(19)" oninput="updateFromInput(19)">
+                        <button class="quantity-btn" onclick="changeQuantity(19, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-19">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">21</div>
+                    <div class="item-info">
+                        <div class="item-name">06a. Sauvignon Blanc 0,75 Flasche</div>
+                        <div class="item-price">18,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(20, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-20" value="0" min="0" max="99" onchange="updateFromInput(20)" oninput="updateFromInput(20)">
+                        <button class="quantity-btn" onclick="changeQuantity(20, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-20">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">22</div>
+                    <div class="item-info">
+                        <div class="item-name">07. Chardonay Reseve 0,1 Glas</div>
+                        <div class="item-price">5,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(21, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-21" value="0" min="0" max="99" onchange="updateFromInput(21)" oninput="updateFromInput(21)">
+                        <button class="quantity-btn" onclick="changeQuantity(21, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-21">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">23</div>
+                    <div class="item-info">
+                        <div class="item-name">07a. Chardonay Reseve 0,75 Flasche</div>
+                        <div class="item-price">28,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(22, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-22" value="0" min="0" max="99" onchange="updateFromInput(22)" oninput="updateFromInput(22)">
+                        <button class="quantity-btn" onclick="changeQuantity(22, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-22">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">24</div>
+                    <div class="item-info">
+                        <div class="item-name">08 Scheurebe fruchtsüß 0,1 Glas</div>
+                        <div class="item-price">3,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(23, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-23" value="0" min="0" max="99" onchange="updateFromInput(23)" oninput="updateFromInput(23)">
+                        <button class="quantity-btn" onclick="changeQuantity(23, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-23">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">25</div>
+                    <div class="item-info">
+                        <div class="item-name">08a. Scheurebe fruchtsüß 0,75 Flasche</div>
+                        <div class="item-price">16,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(24, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-24" value="0" min="0" max="99" onchange="updateFromInput(24)" oninput="updateFromInput(24)">
+                        <button class="quantity-btn" onclick="changeQuantity(24, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-24">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">26</div>
+                    <div class="item-info">
+                        <div class="item-name">09. Riesling Steinrossel 0,1 Glas</div>
+                        <div class="item-price">3,50 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(25, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-25" value="0" min="0" max="99" onchange="updateFromInput(25)" oninput="updateFromInput(25)">
+                        <button class="quantity-btn" onclick="changeQuantity(25, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-25">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">27</div>
+                    <div class="item-info">
+                        <div class="item-name">09a. Riesling Steinrossel 0,75 Flasche</div>
+                        <div class="item-price">18,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(26, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-26" value="0" min="0" max="99" onchange="updateFromInput(26)" oninput="updateFromInput(26)">
+                        <button class="quantity-btn" onclick="changeQuantity(26, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-26">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">28</div>
+                    <div class="item-info">
+                        <div class="item-name">10. Blanc de Noir trocken 0,1 Glas</div>
+                        <div class="item-price">3,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(27, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-27" value="0" min="0" max="99" onchange="updateFromInput(27)" oninput="updateFromInput(27)">
+                        <button class="quantity-btn" onclick="changeQuantity(27, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-27">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">29</div>
+                    <div class="item-info">
+                        <div class="item-name">10a. Blanc de Noir trocken 0,75 Flasche</div>
+                        <div class="item-price">16,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(28, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-28" value="0" min="0" max="99" onchange="updateFromInput(28)" oninput="updateFromInput(28)">
+                        <button class="quantity-btn" onclick="changeQuantity(28, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-28">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">30</div>
+                    <div class="item-info">
+                        <div class="item-name">11. Rosalie Rosé 0,1 Glas</div>
+                        <div class="item-price">3,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(29, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-29" value="0" min="0" max="99" onchange="updateFromInput(29)" oninput="updateFromInput(29)">
+                        <button class="quantity-btn" onclick="changeQuantity(29, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-29">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">31</div>
+                    <div class="item-info">
+                        <div class="item-name">11a. Rosalie Rosé 0,75 Flasche</div>
+                        <div class="item-price">16,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(30, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-30" value="0" min="0" max="99" onchange="updateFromInput(30)" oninput="updateFromInput(30)">
+                        <button class="quantity-btn" onclick="changeQuantity(30, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-30">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">32</div>
+                    <div class="item-info">
+                        <div class="item-name">12. Arvalus Rotwein 0,1 Glas</div>
+                        <div class="item-price">3,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(31, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-31" value="0" min="0" max="99" onchange="updateFromInput(31)" oninput="updateFromInput(31)">
+                        <button class="quantity-btn" onclick="changeQuantity(31, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-31">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">33</div>
+                    <div class="item-info">
+                        <div class="item-name">12a. Arvalus Rotwein 0,75 Flasche</div>
+                        <div class="item-price">16,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(32, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-32" value="0" min="0" max="99" onchange="updateFromInput(32)" oninput="updateFromInput(32)">
+                        <button class="quantity-btn" onclick="changeQuantity(32, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-32">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">34</div>
+                    <div class="item-info">
+                        <div class="item-name">13.Spätburgunder 0,1 Glas</div>
+                        <div class="item-price">3,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(33, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-33" value="0" min="0" max="99" onchange="updateFromInput(33)" oninput="updateFromInput(33)">
+                        <button class="quantity-btn" onclick="changeQuantity(33, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-33">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">35</div>
+                    <div class="item-info">
+                        <div class="item-name">13a.Spätburgunder 0,75 Flasche</div>
+                        <div class="item-price">16,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(34, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-34" value="0" min="0" max="99" onchange="updateFromInput(34)" oninput="updateFromInput(34)">
+                        <button class="quantity-btn" onclick="changeQuantity(34, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-34">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">36</div>
+                    <div class="item-info">
+                        <div class="item-name">14. Cabernet Blanc alkoholfrei 0,1 Glas</div>
+                        <div class="item-price">3,50 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(35, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-35" value="0" min="0" max="99" onchange="updateFromInput(35)" oninput="updateFromInput(35)">
+                        <button class="quantity-btn" onclick="changeQuantity(35, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-35">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">37</div>
+                    <div class="item-info">
+                        <div class="item-name">14a. Cabernet Blanc alkoholfrei 0,75 Flasche</div>
+                        <div class="item-price">18,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(36, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-36" value="0" min="0" max="99" onchange="updateFromInput(36)" oninput="updateFromInput(36)">
+                        <button class="quantity-btn" onclick="changeQuantity(36, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-36">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">38</div>
+                    <div class="item-info">
+                        <div class="item-name">15. Secco Alberto 0,1 Glas</div>
+                        <div class="item-price">3,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(37, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-37" value="0" min="0" max="99" onchange="updateFromInput(37)" oninput="updateFromInput(37)">
+                        <button class="quantity-btn" onclick="changeQuantity(37, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-37">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">39</div>
+                    <div class="item-info">
+                        <div class="item-name">15a. Secco Alberto 0,75 Flasche</div>
+                        <div class="item-price">16,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(38, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-38" value="0" min="0" max="99" onchange="updateFromInput(38)" oninput="updateFromInput(38)">
+                        <button class="quantity-btn" onclick="changeQuantity(38, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-38">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">40</div>
+                    <div class="item-info">
+                        <div class="item-name">16. Sommerpassion 0,1 Glas</div>
+                        <div class="item-price">3,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(39, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-39" value="0" min="0" max="99" onchange="updateFromInput(39)" oninput="updateFromInput(39)">
+                        <button class="quantity-btn" onclick="changeQuantity(39, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-39">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">41</div>
+                    <div class="item-info">
+                        <div class="item-name">16a. Sommerpassion 0,75 Flasche</div>
+                        <div class="item-price">16,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(40, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-40" value="0" min="0" max="99" onchange="updateFromInput(40)" oninput="updateFromInput(40)">
+                        <button class="quantity-btn" onclick="changeQuantity(40, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-40">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">42</div>
+                    <div class="item-info">
+                        <div class="item-name">17. Pinot Blanc de Noir Sekt Brut 0,1 Glas</div>
+                        <div class="item-price">5,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(41, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-41" value="0" min="0" max="99" onchange="updateFromInput(41)" oninput="updateFromInput(41)">
+                        <button class="quantity-btn" onclick="changeQuantity(41, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-41">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">43</div>
+                    <div class="item-info">
+                        <div class="item-name">17a. Pinot Blanc de Noir Sekt Brut 0,75 Flasche</div>
+                        <div class="item-price">26,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(42, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-42" value="0" min="0" max="99" onchange="updateFromInput(42)" oninput="updateFromInput(42)">
+                        <button class="quantity-btn" onclick="changeQuantity(42, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-42">0,00 €</div>
+                </div>
+            </div>
+ 
+ 
+ 
+<div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">44</div>
+                    <div class="item-info">
+                        <div class="item-name">Apero Spritzz 0,2l</div>
+                        <div class="item-price">6,50 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(43, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-43" value="0" min="0" max="99" onchange="updateFromInput(43)" oninput="updateFromInput(43)">
+                        <button class="quantity-btn" onclick="changeQuantity(43, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-43">0,00 €</div>
+                </div>
+            </div>
+ 
+            <div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">45</div>
+                    <div class="item-info">
+                        <div class="item-name">Gälweiler's b- Fresh 0,4 l</div>
+                        <div class="item-price">6,50 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(44, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-44" value="0" min="0" max="99" onchange="updateFromInput(44)" oninput="updateFromInput(44)">
+                        <button class="quantity-btn" onclick="changeQuantity(44, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-44">0,00 €</div>
+                </div>
+            </div>
+ 
+  <h2 id="Speisen" style="color: green;">Speisen</h2><a href="#Getränke">Link Getränke</a> &nbsp <a href="#Weine">Link Weine</a>  &nbsp <a href="#Summe">Link Summe</a>
+ 
+<div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">46</div>
+                    <div class="item-info">
+                        <div class="item-name">01. Spießbratn mit Pellkart & Kräuterquark</div>
+                        <div class="item-price">15,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(45, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-45" value="0" min="0" max="99" onchange="updateFromInput(45)" oninput="updateFromInput(45)">
+                        <button class="quantity-btn" onclick="changeQuantity(45, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-45">0,00 €</div>
+                </div>
+            </div>
+ 
+<div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">47</div>
+                    <div class="item-info">
+                        <div class="item-name">02. Spießbratn mit Pommes</div>
+                        <div class="item-price">14,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(46, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-46" value="0" min="0" max="99" onchange="updateFromInput(46)" oninput="updateFromInput(46)">
+                        <button class="quantity-btn" onclick="changeQuantity(46, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-46">0,00 €</div>
+                </div>
+            </div>
+ 
+<div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">48</div>
+                    <div class="item-info">
+                        <div class="item-name">03. Spießbratn mit Brötchen</div>
+                        <div class="item-price">6,50 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(47, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-47" value="0" min="0" max="99" onchange="updateFromInput(47)" oninput="updateFromInput(47)">
+                        <button class="quantity-btn" onclick="changeQuantity(47, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-47">0,00 €</div>
+                </div>
+            </div>
+ 
+<div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">49</div>
+                    <div class="item-info">
+                        <div class="item-name">04. Pellkartoffeln mit Räucherlachs</div>
+                        <div class="item-price">13,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(48, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-48" value="0" min="0" max="99" onchange="updateFromInput(48)" oninput="updateFromInput(48)">
+                        <button class="quantity-btn" onclick="changeQuantity(48, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-48">0,00 €</div>
+                </div>
+            </div>
+ 
+<div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">50</div>
+                    <div class="item-info">
+                        <div class="item-name">05. Pellkartoffeln mit Kräuterquark</div>
+                        <div class="item-price">6,50 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(49, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-49" value="0" min="0" max="99" onchange="updateFromInput(49)" oninput="updateFromInput(49)">
+                        <button class="quantity-btn" onclick="changeQuantity(49, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-49">0,00 €</div>
+                </div>
+            </div>
+ 
+<div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">51</div>
+                    <div class="item-info">
+                        <div class="item-name">06. Bratwurst vom Bauer Balzer Specksauce + Pommes</div>
+                        <div class="item-price">9,50 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(50, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-50" value="0" min="0" max="99" onchange="updateFromInput(50)" oninput="updateFromInput(50)">
+                        <button class="quantity-btn" onclick="changeQuantity(50, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-50">0,00 €</div>
+                </div>
+            </div>
+ 
+<div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">52</div>
+                    <div class="item-info">
+                        <div class="item-name">07. Bratwurst vom Bauer Balzer + Specksauce u Krustenbrot</div>
+                        <div class="item-price">6,50 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(51, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-51" value="0" min="0" max="99" onchange="updateFromInput(51)" oninput="updateFromInput(51)">
+                        <button class="quantity-btn" onclick="changeQuantity(51, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-51">0,00 €</div>
+                </div>
+            </div>
+ 
+<div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">53</div>
+                    <div class="item-info">
+                        <div class="item-name">08. Bratwurst vom Bauer B. im Brötchen</div>
+                        <div class="item-price">4,50 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(52, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-52" value="0" min="0" max="99" onchange="updateFromInput(52)" oninput="updateFromInput(52)">
+                        <button class="quantity-btn" onclick="changeQuantity(52, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-52">0,00 €</div>
+                </div>
+            </div>
+ 
+<div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">54</div>
+                    <div class="item-info">
+                        <div class="item-name">09. Bunter Linsensalat</div>
+                        <div class="item-price">14,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(53, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-53" value="0" min="0" max="99" onchange="updateFromInput(53)" oninput="updateFromInput(53)">
+                        <button class="quantity-btn" onclick="changeQuantity(53, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-53">0,00 €</div>
+                </div>
+            </div>
+ 
+<div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">55</div>
+                    <div class="item-info">
+                        <div class="item-name">10. Geräuchertes Filet von Hunsrückforelle</div>
+                        <div class="item-price">9,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(54, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-54" value="0" min="0" max="99" onchange="updateFromInput(54)" oninput="updateFromInput(54)">
+                        <button class="quantity-btn" onclick="changeQuantity(54, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-54">0,00 €</div>
+                </div>
+             </div>
+ 
+<div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">56</div>
+                    <div class="item-info">
+                        <div class="item-name">11. Marinierter Schafskäse mit Oliven</div>
+                        <div class="item-price">9,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(55, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-55" value="0" min="0" max="99" onchange="updateFromInput(55)" oninput="updateFromInput(55)">
+                        <button class="quantity-btn" onclick="changeQuantity(55, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-55">0,00 €</div>
+                </div>
+             </div>
+ 
+<div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">57</div>
+                    <div class="item-info">
+                        <div class="item-name">12. Schweizer Wurstsalat</div>
+                        <div class="item-price">9,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(56, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-56" value="0" min="0" max="99" onchange="updateFromInput(56)" oninput="updateFromInput(56)">
+                        <button class="quantity-btn" onclick="changeQuantity(56, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-56">0,00 €</div>
+                </div>
+             </div>
+ 
+<div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">58</div>
+                    <div class="item-info">
+                        <div class="item-name">13. kleiner gemischter Salat</div>
+                        <div class="item-price">4,50 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(57, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-57" value="0" min="0" max="99" onchange="updateFromInput(57)" oninput="updateFromInput(57)">
+                        <button class="quantity-btn" onclick="changeQuantity(57, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-57">0,00 €</div>
+                </div>
+              </div>
+ 
+<div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">59</div>
+                    <div class="item-info">
+                        <div class="item-name">14. Pommes mit Mayo/ Ketchup</div>
+                        <div class="item-price">4,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(58, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-58" value="0" min="0" max="99" onchange="updateFromInput(58)" oninput="updateFromInput(58)">
+                        <button class="quantity-btn" onclick="changeQuantity(58, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-58">0,00 €</div>
+                </div>
+             </div>
+ 
+<div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">60</div>
+                    <div class="item-info">
+                        <div class="item-name">15. Knabberteller</div>
+                        <div class="item-price">7,00 €</div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <div class="quantity-section">
+                        <button class="quantity-btn" onclick="changeQuantity(59, -1)" type="button">−</button>
+                        <input type="number" class="quantity-input" id="quantity-59" value="0" min="0" max="99" onchange="updateFromInput(59)" oninput="updateFromInput(59)">
+                        <button class="quantity-btn" onclick="changeQuantity(59, 1)" type="button">+</button>
+                    </div>
+                    <div class="item-subtotal" id="subtotal-59">0,00 €</div>
+                </div>
+            </div>
+ 
+<div class="menu-item">
+                <div class="item-header">
+                    <div class="item-number">61</div>
+                    <div class="item-info">
+                        <div class="item-name">Bemerkungen</div>
+                        <div class="item-price" style="color:#999;">Freitext</div>
+                    </div>
+                </div>
+                <div class="quantity-controls" style="display:block;">
+                    <textarea id="bemerkungen-input" placeholder="Bemerkungen zur Bestellung …" rows="3"
+                        style="width:100%;padding:10px 12px;border:3px solid #667eea;border-radius:12px;font-size:0.95rem;font-family:inherit;resize:vertical;outline:none;box-sizing:border-box;margin-top:5px;"
+                        oninput="updateBemerkungen()"></textarea>
+                </div>
+            </div>
+ 
+        &nbsp <a href="#Getränke">Link Getränke</a> &nbsp <a href="#Weine">Link Weine</a>  &nbsp <a href="#Speisen">Link Speisen</a>
+ 
+ 
+        
+ 
+ 
+        
+        <div id="Summe" class="total-section">
+            <h2>Gesamtsumme</h2>
+            <div class="total-amount" id="total-amount">0,00 €</div>
+            
+            <div class="payment-section">
+                <div class="payment-row">
+                    <label for="payment-input">Erhalten:</label>
+                    <input type="number" id="payment-input" class="payment-input" placeholder="0,00" min="0" step="0.01" oninput="updateChange()" onchange="updateChange()">
+                    <span>€</span>
+                </div>
+                
+                <div class="change-row">
+                    <div class="change-label">Rückgabe:</div>
+                    <div class="change-amount" id="change-amount">0,00 €</div>
+                </div>
+            </div>
+            
+            <button class="reset-btn" onclick="resetAll()" type="button">Alle zurücksetzen</button>
+ 
+        <!-- ===== BESTELLVERWALTUNG PANEL ===== -->
+        <div class="order-panel" id="orderPanel">
+            <h3>🧾 Bestellverwaltung</h3>
+ 
+            <!-- Zusammenfassung der aktuellen Posten -->
+            <div class="current-order-summary" id="currentOrderSummary">
+                <h4>🧾 Aktuelle Posten</h4>
+                <div class="cos-empty" id="cosEmpty">Noch keine Artikel ausgewählt.</div>
+                <div id="cosItems"></div>
+                <div class="cos-total" id="cosTotal" style="display:none;">
+                    <span>Gesamtbetrag:</span>
+                    <span id="cosTotalAmount">0,00 €</span>
+                </div>
+            </div>
+ 
+            <div class="table-row">
+                <input type="text" class="table-input" id="tableNumber" placeholder="Tisch / Name" maxlength="30">
+                <button class="btn-order" onclick="addOrder()" type="button">📋 Bestellung aufnehmen</button>
+            </div>
+ 
+            <div class="orders-summary" id="ordersSummary"></div>
+ 
+            <div class="table-row" style="justify-content:flex-end; gap:10px;">
+                <button class="btn-clear-orders" onclick="clearPaidOrders()" type="button">🗑️ Bezahlte löschen</button>
+            </div>
+ 
+            <div class="orders-list" id="ordersList">
+                <div class="orders-empty">Noch keine Bestellungen aufgenommen.</div>
+            </div>
+        </div>
+ 
+    </div><!-- /.container -->
+ 
+    <!-- html2canvas für Bestellbild -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+ 
+    <!-- Screenshot-Modal -->
+    <div id="screenshotModal" style="display:none;position:fixed;z-index:9000;inset:0;background:rgba(0,0,0,0.7);padding:20px;overflow-y:auto;">
+        <div style="background:white;max-width:420px;margin:20px auto;border-radius:16px;padding:20px;text-align:center;">
+            <h3 style="margin-bottom:12px;color:#e67e22;">📸 Bestellung als Bild speichern</h3>
+            <p style="font-size:0.9rem;color:#555;margin-bottom:16px;">Bild antippen &amp; gedrückt halten (iOS) oder den Button nutzen, um es zu speichern.</p>
+            <img id="screenshotImage" src="" alt="Bestellübersicht" style="width:100%;border-radius:10px;border:1px solid #eee;margin-bottom:16px;">
+            <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+                <a id="screenshotDownload" download="Bestellung.png" style="background:linear-gradient(135deg,#f7971e,#ffd200);color:white;padding:12px 22px;border-radius:12px;font-weight:bold;text-decoration:none;font-size:0.95rem;">⬇️ Bild speichern</a>
+                <button onclick="document.getElementById('screenshotModal').style.display='none'" style="background:#ccc;border:none;padding:12px 22px;border-radius:12px;font-weight:bold;cursor:pointer;font-size:0.95rem;">Schließen</button>
+            </div>
+        </div>
+    </div>
+ 
+    <!-- Unsichtbares Render-Element für Screenshot -->
+    <div id="orderReceiptRender" style="position:fixed;left:-9999px;top:0;width:380px;background:white;padding:24px;font-family:'Segoe UI',sans-serif;"></div>
+ 
+    <script>
+function showOrdersSummary() {
+    const modal = document.getElementById('ordersSummaryModal');
+    const content = document.getElementById('ordersSummaryContent');
+    const totalField = document.getElementById('ordersGrandTotal');
+ 
+    if (!orders || orders.length === 0) {
+        content.innerHTML = '<p>Keine Bestellungen vorhanden.</p>';
+        totalField.innerHTML = 'Gesamtsumme: 0,00 €';
+        modal.style.display = 'block';
+        return;
+    }
+ 
+    let output = '';
+    let grandTotal = 0;
+ 
+    orders.forEach((order) => {
+        grandTotal += Number(order.total || 0);
+ 
+        output += `
+        <div class="summary-order">
+            <strong>Tisch:</strong> ${order.table || '-'}<br>
+            <strong>Status:</strong> ${order.status || '-'}<br>
+            <strong>Bestellung:</strong><br>
+            ${order.items || '-'}<br><br>
+            <strong>Summe:</strong> ${Number(order.total || 0).toFixed(2)} €
+        </div>
+        `;
+    });
+ 
+    content.innerHTML = output;
+    totalField.innerHTML = 'Gesamtsumme aller Bestellungen: ' + grandTotal.toFixed(2) + ' €';
+    modal.style.display = 'block';
+}
+ 
+function closeOrdersSummary() {
+    document.getElementById('ordersSummaryModal').style.display = 'none';
+}
+ 
+</script>
+ 
+    <script>
+        // JavaScript wird nur ausgeführt wenn erlaubt
+        document.body.classList.add('js-enabled');
+        
+        const menuItems = [
+            { name: "Coca-Cola, Limonade 0,2 l", price: 2.50, quantity: 0 },
+            { name: "Coca Cola, Limonade 0,4 l", price: 4.50, quantity: 0 },
+            { name: "Mineralwasser 0,2 l", price: 2.00, quantity: 0 },
+            { name: "Mineralwasser Flasche 0,75", price: 4.50, quantity: 0 },
+            { name: "Trauben- Apfelsaft / Schorlen / Weinschorlen (Riesl, Rosé) 0,2 l", price: 2.50, quantity: 0 },
+            { name: "Trauben- Apfelsaft / Schorlen / Weinschorlen (Riesl, Rosé) 0,4 l", price: 4.50, quantity: 0 },
+            { name: "leer", price: 0.00, quantity: 0 },
+            { name: "leer 2", price: 0.00, quantity: 0 },
+            { name: "Hefebranntwein  2cl", price: 2.50, quantity: 0 },
+            { name: "01. Weißer Burgunder trocken 2025, Glas 0,1 l", price: 3.00, quantity: 0 },
+            { name: "01.a Weißer Burgunder trocken 2025, Flasche 0,75 l", price: 16.00, quantity: 0 },
+            { name: "02. Guts Riesling feinherb, 0,1 Glas", price: 3.00, quantity: 0 },
+            { name: "02a.Guts Riesling, Flasche 0,75l", price: 16.00, quantity: 0 },
+            { name: "03. Grauer Burgunder trocken 0,1 Glas", price: 3.50, quantity: 0 },
+            { name: "03a. Grauer Burgunder trocken  0,75 Flasche", price: 18.00, quantity: 0 },
+            { name: "04. Riesl. v.roten Sandstein St. Cath trock 0,1 Glas", price: 3.50, quantity: 0 },
+            { name: "04a. Riesl v.roten Sandstein St. Cath trock 0,75 Flasche", price: 18.00, quantity: 0 },
+            { name: "05. Sauvignon Blanc St. Cath trocken 0,1 Glas", price: 3.50, quantity: 0 },
+            { name: "05a. Sauvignon Blanc St. Cath trocken 0,75 Flasche", price: 18.00, quantity: 0 },
+            { name: "06. Chardonnay Reserve trocken", price: 5.00, quantity: 0 },
+            { name: "06a. Chardonnay Reserve trocken 0,75 Flasche", price: 28.00, quantity: 0 },
+            { name: "07. Scheurebe fruchtsüß 0,1 Glas", price: 3.00, quantity: 0 },
+            { name: "07a. Scheurebe fruchtsüß 0,75 Flasche", price: 16.00, quantity: 0 },
+            { name: "08 Steinrossel Riesl. Kabinett - liebl 0,1 Glas", price: 3.50, quantity: 0 },
+            { name: "08a. Steinrossel Riesl Kabinett liebl 0,75 Flasche", price: 18.00, quantity: 0 },
+            { name: "09. Blanc de Noir trocken 0,1 Glas", price: 3.00, quantity: 0 },
+            { name: "09a. Blanc de Noir trocken 0,75 Flasche", price: 16.00, quantity: 0 },
+            { name: "10. Pinot Rosé trocken 0,1 Glas", price: 3.50, quantity: 0 },
+            { name: "10a. Pinot Rosé trocken  0,75 Flasche", price: 18.00, quantity: 0 },
+            { name: "11. Cuvée Rosalie Rosé fruchtig liebl. 0,1 Glas", price: 3.00, quantity: 0 },
+            { name: "11a. Cuvée Rosalie Rosé fruchtig liebl 0,75 Flasche", price: 16.00, quantity: 0 },
+            { name: "12. Arvalus Rotwein 0,1 Glas", price: 3.00, quantity: 0 },
+            { name: "12a. Arvalus Rotwein 0,75 Flasche", price: 16.00, quantity: 0 },
+            { name: "13.Spätburgunder trocken 0,1 Glas", price: 3.50, quantity: 0 },
+            { name: "13a.Spätburgunder trocken 0,75 Flasche", price: 18.00, quantity: 0 },
+            { name: "14. Cabernet Blanc Zero alkoholfrei 0,1 Glas", price: 3.50, quantity: 0 },
+            { name: "14a. Cabernet Blanc alkoholfrei 0,75 Flasche", price: 18.00, quantity: 0 },
+            { name: "15. Secco Alberto frucht tr. 0,1 Glas", price: 3.00, quantity: 0 },
+            { name: "15a. Secco Alberto 0,75 Flasche", price: 16.00, quantity: 0 },
+            { name: "16. Sommerpassion 0,1 Glas", price: 3.00, quantity: 0 },
+            { name: "16a. Sommerpassion 0,75 Flasche", price: 16.00, quantity: 0 },
+            { name: "17. Pinot Blanc de Noir Sekt Brut 0,1 Glas", price: 5.00, quantity: 0 },
+            { name: "17a. Pinot Blanc de Noir Sekt Brut 0,75 Flasche", price: 26.00, quantity: 0 },
+            { name: "Apero Spritzz 0,2l", price: 6.50, quantity: 0 },
+            { name: "G's b- Fresh 0,4 l", price: 6.50, quantity: 0 },
+            { name: "01. Spießbratn mit Pellkart & Kräuterquark", price: 16.00, quantity: 0 },
+            { name: "02. Spießbratn mit Pommes", price: 15.00, quantity: 0 },
+            { name: "03. Spießbratn mit Brötchen", price: 6.50, quantity: 0 },
+            { name: "04. Pellkartoffeln mit Räucherlachs", price: 13.50, quantity: 0 },
+            { name: "05. Pellkartoffeln mit Kräuterquark", price: 7.00, quantity: 0 },
+            { name: "06. Bratwurst vom Bauer Balzer Specksauce + Pommes", price: 10.00, quantity: 0 },
+            { name: "07. Bratwurst vom Bauer Balzer + Specksauce u Krustenbrot", price: 7.00, quantity: 0 },
+            { name: "08. Bratwurst vom Bauer B. im Brötchen", price: 4.50, quantity: 0 },
+            { name: "09. Bunter Linsensalat", price: 14.50, quantity: 0 },
+            { name: "10. Geräuchertes Filet von Hunsrückforelle", price: 9.50, quantity: 0 },
+            { name: "11. Marinierter Schafskäse mit Oliven", price: 9.50, quantity: 0 },
+            { name: "12. Schweizer Wurstsalat", price: 9.50, quantity: 0 },
+            { name: "13. kleiner gemischter Salat", price: 4.50, quantity: 0 },
+            { name: "14. Pommes mit Mayo/ Ketchup", price: 4.00, quantity: 0 },
+            { name: "15. Knabberteller", price: 7.50, quantity: 0 },
+        ];
+ 
+        // ===== BESTELLUNGEN =====
+        // ===== GOOGLE SHEETS KONFIGURATION =====
+        // Ihre Web App URL hier eintragen (nach Schritt 4 der Anleitung):
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbymLeeCmpuL4fEWdP7TLAVYgMJ_n7Pp7nlBBAIKHBTAaoMAemgyg48CWt0xkmhKcmVLzg/exec';
+ 
+        let orders = [];
+        let orderCounter = 1;
+ 
+           // Initialisierung: Daten aus LocalStorage laden
+    window.onload = () => {
+        const saved = localStorage.getItem('weinrechner_orders');
+        if (saved) {
+            try { orders = JSON.parse(saved); } catch(e) { orders = []; }
+        }
+        const savedCounter = localStorage.getItem('weinrechner_counter');
+        if (savedCounter) {
+            orderCounter = parseInt(savedCounter, 10) || 1;
+        }
+        renderOrders();
+    };
+ 
+        // Sendet Daten an Google Sheets
+        // WICHTIG: Wir nutzen absichtlich KEIN fetch()/XHR mehr, sondern
+        // ein verstecktes <form>, das in ein unsichtbares iFrame gesendet
+        // wird. Grund: fetch() mit mode:'no-cors' hängt sich auf manchen
+        // iOS-Safari-Versionen bei der internen Weiterleitung, die Google
+        // Apps Script bei jedem /exec-Aufruf macht, lautlos auf – weder
+        // .then() noch .catch() feuert dann. Eine normale Formular-
+        // Übertragung ist davon nicht betroffen und funktioniert auf
+        // Android und iOS gleichermaßen zuverlässig.
+        // Google Apps Script liest den Wert dann über: e.parameter.payload
+        function syncToSheets(payload) {
+            try {
+                let iframe = document.getElementById('syncIframe');
+                if (!iframe) {
+                    iframe = document.createElement('iframe');
+                    iframe.id = 'syncIframe';
+                    iframe.name = 'syncIframe';
+                    iframe.style.display = 'none';
+                    document.body.appendChild(iframe);
+                }
+
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = GOOGLE_SCRIPT_URL;
+                form.target = 'syncIframe';
+                form.style.display = 'none';
+
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'payload';
+                input.value = JSON.stringify(payload);
+                form.appendChild(input);
+
+                document.body.appendChild(form);
+                form.submit();
+                form.remove();
+
+                // Da das Formular in ein unsichtbares iFrame lädt, kann der
+                // eigentliche Server-Erfolg nicht ausgelesen werden (genau
+                // wie zuvor bei no-cors). Wir zeigen daher an, dass die
+                // Anfrage abgeschickt wurde.
+                showSyncIndicator('✅ An Google Sheets gesendet');
+            } catch (err) {
+                showSyncIndicator('⚠️ Fehler: ' + (err ? err.message : '?'), true);
+            }
+        }
+ 
+        function showSyncIndicator(msg, isError = false) {
+            let el = document.getElementById('syncIndicator');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'syncIndicator';
+                el.style.cssText = 'position:fixed;bottom:20px;right:20px;padding:10px 18px;border-radius:20px;font-weight:bold;font-size:0.9rem;z-index:9999;transition:opacity 0.5s;box-shadow:0 4px 12px rgba(0,0,0,0.2);';
+                document.body.appendChild(el);
+            }
+            el.textContent = msg;
+            el.style.background = isError ? '#e74c3c' : '#2ecc71';
+            el.style.color = 'white';
+            el.style.opacity = '1';
+            clearTimeout(el._timeout);
+            el._timeout = setTimeout(() => el.style.opacity = '0', 3000);
+        }
+ 
+        function changeQuantity(itemIndex, change) {
+            const item = menuItems[itemIndex];
+            const newQuantity = Math.max(0, item.quantity + change);
+            item.quantity = newQuantity;
+            document.getElementById(`quantity-${itemIndex}`).value = newQuantity;
+            updateDisplay(itemIndex);
+            updateTotal();
+            if (navigator.vibrate) navigator.vibrate(30);
+        }
+        
+        function updateFromInput(itemIndex) {
+            const inputElement = document.getElementById(`quantity-${itemIndex}`);
+            const newQuantity = Math.max(0, parseInt(inputElement.value) || 0);
+            menuItems[itemIndex].quantity = newQuantity;
+            inputElement.value = newQuantity;
+            updateDisplay(itemIndex);
+            updateTotal();
+        }
+ 
+        function updateDisplay(itemIndex) {
+            const item = menuItems[itemIndex];
+            const subtotal = item.price * item.quantity;
+            document.getElementById(`subtotal-${itemIndex}`).textContent = formatPrice(subtotal);
+        }
+ 
+        function updateTotal() {
+            const total = menuItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            document.getElementById('total-amount').textContent = formatPrice(total);
+            updateCurrentOrderSummary();
+        }
+ 
+        function updateCurrentOrderSummary() {
+            const selected = menuItems.filter(item => item.quantity > 0);
+            const bemerkungen          = document.getElementById('bemerkungen-input')           ? document.getElementById('bemerkungen-input').value.trim()           : '';
+            const bemerkungenGetraenke = document.getElementById('bemerkungen-getraenke-input') ? document.getElementById('bemerkungen-getraenke-input').value.trim() : '';
+            const cosEmpty = document.getElementById('cosEmpty');
+            const cosItems = document.getElementById('cosItems');
+            const cosTotal = document.getElementById('cosTotal');
+            const cosTotalAmount = document.getElementById('cosTotalAmount');
+ 
+            if (selected.length === 0 && !bemerkungen && !bemerkungenGetraenke) {
+                cosEmpty.style.display = '';
+                cosItems.innerHTML = '';
+                cosTotal.style.display = 'none';
+            } else {
+                cosEmpty.style.display = 'none';
+                let html = selected.map(item => {
+                    const sub = (item.price * item.quantity).toFixed(2).replace('.', ',');
+                    return `<div class="cos-item"><span>${item.quantity}× ${item.name}</span><span>${sub} €</span></div>`;
+                }).join('');
+                if (bemerkungenGetraenke) {
+                    html += `<div style="font-size:0.85rem;color:#555;margin-top:6px;padding:5px 8px;background:#f0fff8;border-left:3px solid #2ecc71;border-radius:5px;">🍹 ${bemerkungenGetraenke}</div>`;
+                }
+                if (bemerkungen) {
+                    html += `<div style="font-size:0.85rem;color:#888;margin-top:6px;padding:5px 8px;background:#fffbf0;border-left:3px solid #feca57;border-radius:5px;">📝 ${bemerkungen}</div>`;
+                }
+                cosItems.innerHTML = html;
+                const total = selected.reduce((sum, item) => sum + item.price * item.quantity, 0);
+                cosTotalAmount.textContent = total.toFixed(2).replace('.', ',') + ' €';
+                cosTotal.style.display = 'flex';
+            }
+        }
+ 
+        function saveOrderAsImage(order) {
+            const el = document.getElementById('orderReceiptRender');
+ 
+            const itemsHtml = order.items.map(item =>
+                `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px dotted #eee;">
+                    <span>${item.quantity}× ${item.name}</span>
+                    <span style="font-weight:bold;white-space:nowrap;margin-left:12px;">${item.subtotal.toFixed(2).replace('.',',')} €</span>
+                </div>`
+            ).join('');
+ 
+            const bemGtHtml = order.bemerkungenGetraenke
+                ? `<div style="margin-top:8px;padding:8px 12px;background:#f0fff8;border-left:4px solid #2ecc71;border-radius:6px;font-size:0.9rem;color:#555;">🍹 ${order.bemerkungenGetraenke}</div>`
+                : '';
+            const bemHtml = order.bemerkungen
+                ? `<div style="margin-top:8px;padding:8px 12px;background:#fffbf0;border-left:4px solid #feca57;border-radius:6px;font-size:0.9rem;color:#555;">📝 ${order.bemerkungen}</div>`
+                : '';
+ 
+            el.innerHTML = `
+                <div style="text-align:center;margin-bottom:16px;">
+                    <div style="font-size:1.6rem;">🍽️ Restaurant Rechner</div>
+                    <div style="font-size:0.85rem;color:#999;margin-top:4px;">Bestellbon</div>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:0.85rem;color:#666;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #f0c040;">
+                    <span>🪑 ${order.table}</span>
+                    <span>#${order.id}</span>
+                    <span>${order.zeitAufgenommen}</span>
+                </div>
+                <div style="margin-bottom:12px;">${itemsHtml}</div>
+                ${bemGtHtml}
+                ${bemHtml}
+                <div style="display:flex;justify-content:space-between;margin-top:14px;padding-top:10px;border-top:3px solid #667eea;font-size:1.1rem;font-weight:bold;">
+                    <span>Gesamt</span>
+                    <span>${order.total.toFixed(2).replace('.',',')} €</span>
+                </div>
+                <div style="text-align:center;margin-top:16px;font-size:0.75rem;color:#bbb;">🟡 Aufgenommen: ${order.zeitAufgenommen}</div>
+            `;
+ 
+            setTimeout(() => {
+                html2canvas(el, { scale: 2, backgroundColor: '#ffffff', useCORS: true }).then(canvas => {
+                    const dataUrl = canvas.toDataURL('image/png');
+                    const img = document.getElementById('screenshotImage');
+                    const link = document.getElementById('screenshotDownload');
+                    const dateiname = `Bestellung_${order.table.replace(/\s+/g,'_')}_${order.id}.png`;
+                    img.src = dataUrl;
+                    link.href = dataUrl;
+                    link.download = dateiname;
+                    document.getElementById('screenshotModal').style.display = 'block';
+                });
+            }, 100);
+        }
+ 
+        function formatPrice(price) {
+            return price.toFixed(2).replace('.', ',') + ' €';
+        }
+ 
+        function updateChange() {
+            const totalElement = document.getElementById('total-amount');
+            const paymentInput = document.getElementById('payment-input');
+            const changeElement = document.getElementById('change-amount');
+            const totalText = totalElement.textContent.replace(' €', '').replace(',', '.');
+            const totalAmount = parseFloat(totalText) || 0;
+            const paidAmount = parseFloat(paymentInput.value) || 0;
+            const change = paidAmount - totalAmount;
+            changeElement.textContent = formatPrice(Math.abs(change));
+            if (change < 0) {
+                changeElement.classList.add('change-negative');
+                changeElement.textContent = '- ' + formatPrice(Math.abs(change));
+            } else {
+                changeElement.classList.remove('change-negative');
+                changeElement.textContent = formatPrice(change);
+            }
+        }
+ 
+        function updateBemerkungen() {
+            updateCurrentOrderSummary();
+        }
+ 
+        function resetAll() {
+            menuItems.forEach((item, index) => {
+                item.quantity = 0;
+                document.getElementById(`quantity-${index}`).value = 0;
+                updateDisplay(index);
+            });
+            document.getElementById('payment-input').value = '';
+            var bemEl = document.getElementById('bemerkungen-input');
+            if (bemEl) bemEl.value = '';
+            var bemGtEl = document.getElementById('bemerkungen-getraenke-input');
+            if (bemGtEl) bemGtEl.value = '';
+            updateTotal();
+            updateChange();
+        }
+ 
+        // ===== BESTELLVERWALTUNG FUNKTIONEN =====
+ 
+        function saveOrders() {
+            localStorage.setItem('weinrechner_orders', JSON.stringify(orders));
+            localStorage.setItem('weinrechner_counter', orderCounter);
+        }
+ 
+        function getTimestamp() {
+            const now = new Date();
+            return now.toLocaleString('de-DE', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit' });
+        }
+ 
+        function addOrder() {
+            const tableVal = document.getElementById('tableNumber').value.trim();
+            if (!tableVal) {
+                const input = document.getElementById('tableNumber');
+                input.focus();
+                input.style.borderColor = '#e74c3c';
+                input.placeholder = '⚠️ Bitte Tisch / Name eintragen!';
+                setTimeout(() => {
+                    input.style.borderColor = '';
+                    input.placeholder = 'Tisch / Name';
+                }, 3000);
+                return;
+            }
+            const tableName = tableVal;
+ 
+            const selectedItems = menuItems
+                .map((item, i) => ({ ...item, index: i }))
+                .filter(item => item.quantity > 0);
+ 
+            const bemerkungen = document.getElementById('bemerkungen-input') ? document.getElementById('bemerkungen-input').value.trim() : '';
+            const bemerkungenGetraenke = document.getElementById('bemerkungen-getraenke-input') ? document.getElementById('bemerkungen-getraenke-input').value.trim() : '';
+ 
+            if (selectedItems.length === 0 && !bemerkungen && !bemerkungenGetraenke) {
+                alert('Bitte mindestens einen Artikel auswählen!');
+                return;
+            }
+ 
+            const total = selectedItems.reduce((s, item) => s + item.price * item.quantity, 0);
+ 
+            const order = {
+                id: orderCounter++,
+                table: tableName,
+                items: selectedItems.map(item => ({
+                    name: item.name,
+                    quantity: item.quantity,
+                    price: item.price,
+                    subtotal: item.price * item.quantity,
+                    menuIndex: item.index
+                })),
+                bemerkungen: bemerkungen || null,
+                bemerkungenGetraenke: bemerkungenGetraenke || null,
+                total: total,
+                status: 'aufgenommen',
+                zeitAufgenommen: getTimestamp(),
+                zeitAusgeliefert: null,
+                zeitBezahlt: null,
+                bezahltMit: null,
+                rueckgabe: null,
+            };
+ 
+            // Bezahlt-Betrag übernehmen falls eingegeben
+            const paidVal = parseFloat(document.getElementById('payment-input').value);
+            if (!isNaN(paidVal) && paidVal > 0) {
+                order.bezahltMit = paidVal;
+                order.rueckgabe = Math.max(0, paidVal - total);
+            }
+ 
+            orders.push(order);
+            saveOrders();
+            syncToSheets({ action: 'addOrder', order: order });
+            renderOrders();
+            resetAll();
+            document.getElementById('tableNumber').value = '';
+            saveOrderAsImage(order);
+ 
+            setTimeout(() => {
+                try {
+                    document.getElementById('orderPanel').scrollIntoView({ behavior: 'smooth' });
+                } catch(e) {
+                    document.getElementById('orderPanel').scrollIntoView();
+                }
+            }, 200);
+        }
+ 
+        function changeOrderStatus(id, newStatus) {
+            const order = orders.find(o => o.id === id);
+            if (order) {
+                order.status = newStatus;
+                if (newStatus === 'ausgeliefert') order.zeitAusgeliefert = getTimestamp();
+                if (newStatus === 'bezahlt')      order.zeitBezahlt = getTimestamp();
+                syncToSheets({
+                    action: 'updateStatus',
+                    orderId: order.id,
+                    table: order.table,
+                    zeitAufgenommen: order.zeitAufgenommen,
+                    newStatus: newStatus,
+                    zeitAusgeliefert: order.zeitAusgeliefert || null,
+                    zeitBezahlt: order.zeitBezahlt || null
+                });
+                saveOrders();
+                renderOrders();
+            }
+        }
+ 
+        // Initiale Anzeige
+ 
+        function deleteOrder(id) {
+            if (confirm('Bestellung wirklich löschen?')) {
+                orders = orders.filter(o => o.id !== id);
+                saveOrders();
+                renderOrders();
+            }
+        }
+ 
+        function clearPaidOrders() {
+            const count = orders.filter(o => o.status === 'bezahlt').length;
+            if (count === 0) { alert('Keine bezahlten Bestellungen vorhanden.'); return; }
+            if (confirm(`${count} bezahlte Bestellung(en) löschen?`)) {
+                orders = orders.filter(o => o.status !== 'bezahlt');
+                saveOrders();
+                renderOrders();
+            }
+        }
+ 
+        function statusLabel(status) {
+            const map = { aufgenommen: '🟡 Aufgenommen', ausgeliefert: '🔵 Ausgeliefert', bezahlt: '🟢 Bezahlt' };
+            return map[status] || status;
+        }
+        function badgeClass(status) {
+            const map = { aufgenommen: 'badge-aufgenommen', ausgeliefert: 'badge-ausgeliefert', bezahlt: 'badge-bezahlt' };
+            return map[status] || '';
+        }
+ 
+        function renderOrders() {
+            const list = document.getElementById('ordersList');
+            const summary = document.getElementById('ordersSummary');
+ 
+            const counts = { aufgenommen: 0, ausgeliefert: 0, bezahlt: 0 };
+            orders.forEach(o => counts[o.status]++);
+ 
+            summary.innerHTML = `
+                <div class="summary-chip">📋 Gesamt: ${orders.length}</div>
+                <div class="summary-chip">🟡 Aufgenommen: ${counts.aufgenommen}</div>
+                <div class="summary-chip">🔵 Ausgeliefert: ${counts.ausgeliefert}</div>
+                <div class="summary-chip">🟢 Bezahlt: ${counts.bezahlt}</div>
+            `;
+ 
+            if (orders.length === 0) {
+                list.innerHTML = '<div class="orders-empty">Noch keine Bestellungen aufgenommen.</div>';
+                return;
+            }
+ 
+            list.innerHTML = orders.slice().reverse().map(order => {
+                const itemsHtml = order.items.map(item =>
+                    `${item.quantity}× ${item.name} = ${item.subtotal.toFixed(2).replace('.',',')} €`
+                ).join('<br>');
+ 
+                const bezahltInfo = order.bezahltMit != null
+                    ? `&nbsp;|&nbsp; Erhalten: ${order.bezahltMit.toFixed(2).replace('.',',')} € &nbsp;| Rückgabe: ${(order.rueckgabe||0).toFixed(2).replace('.',',')} €`
+                    : '';
+ 
+                const zeitInfo = `
+                    <div style="font-size:0.78rem;color:#888;margin-top:6px;line-height:1.7;">
+                        🟡 Aufgenommen: ${order.zeitAufgenommen}
+                        ${order.zeitAusgeliefert ? '<br>🔵 Ausgeliefert: ' + order.zeitAusgeliefert : ''}
+                        ${order.zeitBezahlt     ? '<br>🟢 Bezahlt: '      + order.zeitBezahlt     : ''}
+                    </div>`;
+ 
+                const actions = order.status === 'aufgenommen'
+                    ? `<button class="btn-status btn-liefern" onclick="changeOrderStatus(${order.id},'ausgeliefert')">✅ Ausgeliefert</button>
+                       <button class="btn-status btn-bezahlen" onclick="changeOrderStatus(${order.id},'bezahlt')">💶 Bezahlt</button>`
+                    : order.status === 'ausgeliefert'
+                    ? `<button class="btn-status btn-bezahlen" onclick="changeOrderStatus(${order.id},'bezahlt')">💶 Bezahlt</button>`
+                    : '';
+ 
+                return `
+                <div class="order-card status-${order.status}">
+                    <div class="order-header">
+                        <div class="order-meta">
+                            🪑 ${order.table} &nbsp;
+                            <span>#${order.id}</span>
+                        </div>
+                        <span class="order-status-badge ${badgeClass(order.status)}">${statusLabel(order.status)}</span>
+                    </div>
+                    <div class="order-items-list">${itemsHtml}</div>
+                    ${order.bemerkungenGetraenke ? `<div style="font-size:0.88rem;color:#555;margin:6px 0 4px;padding:6px 10px;background:#f0fff8;border-left:3px solid #2ecc71;border-radius:6px;">🍹 ${order.bemerkungenGetraenke}</div>` : ''}
+                    ${order.bemerkungen ? `<div style="font-size:0.88rem;color:#666;margin:6px 0 4px;padding:6px 10px;background:#fffbf0;border-left:3px solid #feca57;border-radius:6px;">📝 ${order.bemerkungen}</div>` : ''}
+                    <div class="order-total-line">
+                        Gesamt: <strong>${order.total.toFixed(2).replace('.',',')} €</strong>${bezahltInfo}
+                    </div>
+                    ${zeitInfo}
+                    <div class="order-actions">
+                        ${actions}
+                        <button class="btn-status btn-loeschen" onclick="deleteOrder(${order.id})">🗑️ Löschen</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+ 
+        // Initiale Anzeige
+        menuItems.forEach((item, index) => updateDisplay(index));
+        updateTotal();
+        renderOrders();
+ 
+        
+        // Beim Starten der Datei: Daten aus dem Speicher holen
+window.addEventListener('DOMContentLoaded', () => {
+    const savedOrders = localStorage.getItem('weinrechner_orders');
+    const savedCounter = localStorage.getItem('weinrechner_counter');
+    if (savedOrders) {
+        orders = JSON.parse(savedOrders);
+        renderOrders();
+    }
+    if (savedCounter) {
+        orderCounter = parseInt(savedCounter, 10);
+    }
+});
+ 
+    </script>
+ 
+<div class="orders-modal" id="ordersSummaryModal">
+    <div class="orders-modal-content">
+        <h2>📋 Alle Bestellungen</h2>
+        <div id="ordersSummaryContent"></div>
+        <div class="summary-total" id="ordersGrandTotal">Gesamtsumme: 0,00 €</div>
+        <button class="close-summary-btn" onclick="closeOrdersSummary()">Schließen</button>
+    </div>
+</div>
+ 
+</body>
+</html>
